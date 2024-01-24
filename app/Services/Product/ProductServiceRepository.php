@@ -2,9 +2,10 @@
 
 namespace App\Services\Product;
 
-use App\Services\Brand\BrandServiceInterface;
+use App\Repositories\Eloquent\ProductRepository;
+use App\Repositories\ProductRepositoryInterface;
 
-class ProductServiceRepository implements BrandServiceInterface
+class ProductServiceRepository implements ProductRepositoryInterface
 {
-
+    public function __construct(private ProductRepository $productRepository){}
 }

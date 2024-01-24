@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Http\Requests\StoreBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
+use App\Services\Brand\BrandServiceRepository;
 
 class BrandController extends Controller
 {
+    public function __construct(private BrandServiceRepository $brandServiceRepository){}
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): \Illuminate\Support\Collection
     {
-        //
+        return $this->brandServiceRepository->all();
     }
 
     /**

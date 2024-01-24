@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Services\Category\CategoryServiceRepository;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class CategoryFactory extends Factory
 {
+
     /**
      * Define the model's default state.
      *
@@ -16,8 +18,12 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
+        $categoryServiceRepository = app(CategoryServiceRepository::class);
+        $parentCategories = $categoryServiceRepository->all()->pluck('id')->toArray();
+        $parentCategories[] = null;
         return [
-            //
+            'name'=>$this->faker->word,
+            'parent_id'=>$this->faker->randomElement($parentCategories),
         ];
     }
 }

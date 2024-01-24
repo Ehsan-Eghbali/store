@@ -10,6 +10,14 @@ class Product extends Model
 {
     use HasFactory,SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'price',
+        'count',
+        'brand_id',
+
+    ];
+
     public function categories(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Category::class);

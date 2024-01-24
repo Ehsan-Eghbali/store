@@ -12,8 +12,9 @@ class BrandRepository extends BaseRepository implements BrandRepositoryInterface
 
     }
 
-    public function store($request)
+
+    public function inRandomOrder()
     {
-        // TODO: Implement store() method.
+        $this->model->inRandomOrder()->first();
     }
 }

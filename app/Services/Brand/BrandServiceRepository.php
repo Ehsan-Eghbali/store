@@ -3,15 +3,15 @@
 namespace App\Services\Brand;
 
 use App\Repositories\BrandRepositoryInterface;
+use App\Repositories\Eloquent\BrandRepository;
+use Illuminate\Database\Eloquent\Collection;
 
-class BrandServiceRepository implements BrandServiceInterface
+class BrandServiceRepository  implements BrandRepositoryInterface
 {
-    public function __construct(private BrandRepositoryInterface $brandService)
-    {
+    public function __construct(private BrandRepository $brandRepository){}
 
-    }
-    public function store($request)
+    public function inRandomOrder() :Collection
     {
-        $this->brandService->store($request);
+        return $this->brandRepository->inRandomOrder();
     }
 }

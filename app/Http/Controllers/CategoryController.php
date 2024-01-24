@@ -5,19 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
+use App\Services\Category\CategoryServiceRepository;
 
 class CategoryController extends Controller
 {
-    public function __construct()
-    {
-
-    }
+    public function __construct(private CategoryServiceRepository $categoryServiceRepository){}
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        $parentCategory = $this->categoryServiceRepository->all()->pluck('id')->toArray();
+        dd($parentCategory);
     }
 
     /**
