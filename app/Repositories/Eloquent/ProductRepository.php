@@ -13,4 +13,12 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
         parent::__construct($model);
     }
 
+    public function transferData(): void
+    {
+        $this->model::chunk(200, function ($models) {
+            foreach ($models as $model) {
+                $model->searchable();
+            }
+        });
+    }
 }

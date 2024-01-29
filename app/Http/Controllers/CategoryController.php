@@ -15,8 +15,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $parentCategory = $this->categoryServiceRepository->all()->pluck('id')->toArray();
-        dd($parentCategory);
+        return $this->categoryServiceRepository->inRandomOrder(rand(1, 5));
     }
 
     /**

@@ -10,14 +10,14 @@ use Illuminate\Support\Collection;
 
 class CategoryServiceRepository  implements CategoryRepositoryInterface
 {
-    public function __construct(private CategoryRepository $categoryRepository){}
+    public function __construct(private readonly CategoryRepository $categoryRepository){}
 
     public function all(): Collection
     {
         return $this->categoryRepository->all();
     }
-    public function inRandomOrder(): Collection
+    public function inRandomOrder($count=1): Collection
     {
-        return $this->categoryRepository->inRandomOrder();
+        return $this->categoryRepository->inRandomOrder($count);
     }
 }

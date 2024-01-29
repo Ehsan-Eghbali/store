@@ -2,19 +2,21 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Models\Brand;
 use App\Repositories\BrandRepositoryInterface;
-use App\Repositories\Eloquent\BaseRepository;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class BrandRepository extends BaseRepository implements BrandRepositoryInterface
 {
-    public function __construct(private BrandRepositoryInterface $brandRepository)
+    public function __construct(Brand $model)
     {
-
+        parent::__construct($model);
     }
 
 
-    public function inRandomOrder()
+    public function inRandomOrder($count=1):Collection
     {
-        $this->model->inRandomOrder()->first();
+        return $this->model->inRandomOrder()->limit($count)->get();
     }
 }

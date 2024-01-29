@@ -8,12 +8,10 @@ use Illuminate\Support\Collection;
 
 class BaseRepository implements EloquentRepositoryInterface
 {
-    protected Model $model;
-
     /**
      * BaseRepository constructor.
      */
-    public function __construct(Model $model)
+    public function __construct(protected Model $model)
     {
         $this->model = $model;
     }

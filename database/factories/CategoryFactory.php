@@ -22,7 +22,7 @@ class CategoryFactory extends Factory
         $parentCategories = $categoryServiceRepository->all()->pluck('id')->toArray();
         $parentCategories[] = null;
         return [
-            'name'=>$this->faker->word,
+            'name'=>$this->faker->firstName." ".$this->faker->lastName,
             'parent_id'=>$this->faker->randomElement($parentCategories),
         ];
     }

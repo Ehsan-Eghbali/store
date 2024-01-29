@@ -15,8 +15,8 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     }
 
 
-    public function inRandomOrder():Collection
+    public function inRandomOrder($count =1):Collection
     {
-        $this->model->inRandomOrder()->first();
+        return $this->model->inRandomOrder()->limit($count)->get();
     }
 }

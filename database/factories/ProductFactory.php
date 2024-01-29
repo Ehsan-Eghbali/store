@@ -21,22 +21,23 @@ class ProductFactory extends Factory
 
         return [
             'name' => $this->faker->word,
-            'price' => $this->faker->randomFloat(),
+            'price' => $this->faker->randomFloat(2),
             'brand_id' => $brand->id,
+            'count'=>rand(1,50),
         ];
     }
 
     /**
      * After creating the product, attach random categories.
      *
-     * @param Product $product
+     *
      * @return ProductFactory
      */
     public function configure(): ProductFactory
     {
         return $this->afterCreating(function (Product $product) {
             $categoryServiceRepository = app(CategoryServiceRepository::class);
-            $categories = $categoryServiceRepository->inRandomOrder()->limit(rand(1, 3))->get();
+            $categories = $categoryServiceRepository->inRandomOrder(rand(1, 5));
             $product->categories()->attach($categories);
         });
     }

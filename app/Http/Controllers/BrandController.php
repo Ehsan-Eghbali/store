@@ -13,9 +13,9 @@ class BrandController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): \Illuminate\Support\Collection
+    public function index()
     {
-        return $this->brandServiceRepository->all();
+        return $this->brandServiceRepository->inRandomOrder(1);
     }
 
     /**

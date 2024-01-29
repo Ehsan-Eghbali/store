@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\CategoryController;
-use App\Models\Product;
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,5 +19,5 @@ use Illuminate\Support\Facades\Route;
 Route::resources([
     'brand'=>BrandController::class,
     'category'=>CategoryController::class,
-    'product'=>Product::class,
+    'product'=>ProductController::class,
 ]);

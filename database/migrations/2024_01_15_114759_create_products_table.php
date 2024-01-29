@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name')->index();
-            $table->decimal('price',30)->default(0);
+            $table->decimal('price',20)->default(0);
             $table->integer('count')->default(0);
-            $table->foreignId('brand_id')->constrained('categories');
+            $table->foreignId('brand_id')->constrained('brands');
             $table->softDeletes();
             $table->timestamps();
         });

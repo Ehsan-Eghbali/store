@@ -4,5 +4,5 @@ namespace App\Repositories;
 
 interface BrandRepositoryInterface
 {
-    public function inRandomOrder();
+    public function inRandomOrder($count=1);
 }

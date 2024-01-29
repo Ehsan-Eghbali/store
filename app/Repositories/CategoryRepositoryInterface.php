@@ -4,5 +4,5 @@ namespace App\Repositories;
 
 interface CategoryRepositoryInterface
 {
-    public function inRandomOrder();
+    public function inRandomOrder($count= 1);
 }
