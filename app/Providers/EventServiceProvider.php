@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Product;
+use App\Observers\BrandObserver;
+use App\Observers\CategoryObserver;
+use App\Observers\ProductObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -20,6 +26,11 @@ class EventServiceProvider extends ServiceProvider
         ],
     ];
 
+    protected $observers = [
+        Brand::class => [BrandObserver::class],
+        Category::class => [CategoryObserver::class],
+        Product::class => [ProductObserver::class],
+    ];
     /**
      * Register any events for your application.
      */

@@ -35,20 +35,24 @@
         public function handle ()
         {
             $this->info('Transferring data from MySQL to Elasticsearch...');
+            $batchSize = 500; // Adjust the batch size based on your needs
+            $lastId = 600000;
+            do {
+                $products = $this->productServiceRepository->transferDataToElastic($batchSize,$lastId);
+                if ($products->count() > 0) {
+                    foreach ($products as $product) {
+                        $body = $product->toArray();
+                        $this->elasticSearchServiceRepository->indexDocument(
+                            '_doc',
+                            $product->id,
+                            $body,
+                        );
+                        $lastId = $product->id;
 
-            $products = $this->productServiceRepository->all()->first();
-            dd($products->categories->pluck('name'));
-            foreach ($products as $product) {
-                $body = $product->toArray();
-                $body['brand_name'] = $product->brand->name;
-                $this->elasticSearchServiceRepository->indexDocument(
-                    'products',
-                    '_doc',
-                    $product->id,
-                    $body,
-                );
-            }
-
+                        $this->info('Transferring data product id =>'.$product->id);
+                    }
+                }
+            } while ($products->count() > 0);
             $this->info('Data transfer completed.');
         }
     }

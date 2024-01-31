@@ -18,6 +18,8 @@ class Product extends Model
         'count',
         'brand_id',
     ];
+    protected $hidden = ['pivot'];
+
 
 
     public function brand (): BelongsTo

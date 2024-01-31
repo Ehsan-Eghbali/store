@@ -13,8 +13,13 @@ class ProductServiceRepository implements ProductRepositoryInterface
     {
         return $this->productRepository->all();
     }
-    public function transferData()
+    public function transferDataToElastic(int $batchSize,int $lastId)
     {
-        return $this->productRepository->transferData();
+        return $this->productRepository->transferDataToElastic($batchSize,$lastId);
+    }
+
+    public function search ($request)
+    {
+        return $this->productRepository->search($request);
     }
 }

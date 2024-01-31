@@ -2,7 +2,9 @@
 
 namespace App\Repositories;
 
+
 interface ProductRepositoryInterface
 {
-    public function transferData();
+    public function transferDataToElastic(int $batchSize,int $lastId);
+    public function search($request);
 }

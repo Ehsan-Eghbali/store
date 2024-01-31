@@ -39,7 +39,7 @@ class BrandController extends Controller
      */
     public function show(Brand $brand)
     {
-        //
+
     }
 
     /**
@@ -55,7 +55,7 @@ class BrandController extends Controller
      */
     public function update(UpdateBrandRequest $request, Brand $brand)
     {
-        //
+        return $this->brandServiceRepository->update((int) $brand->only('id'),$request->validated());
     }
 
     /**
@@ -63,6 +63,6 @@ class BrandController extends Controller
      */
     public function destroy(Brand $brand)
     {
-        //
+        dd($brand);
     }
 }

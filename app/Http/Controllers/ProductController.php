@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Services\Product\ProductServiceRepository;
+use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -19,7 +20,7 @@ class ProductController extends Controller
     public function index()
     {
 
-        return Product::first();
+        return $this->productServiceRepository->transferDataToElastic(5000,1);
     }
 
     /**
@@ -68,5 +69,14 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         //
+    }
+
+    public function search (Request $request)
+
+    {
+        $request->validate([
+            'q'=>'required'
+        ]);
+        return $this->productServiceRepository->search($request);
     }
 }

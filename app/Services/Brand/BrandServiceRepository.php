@@ -15,6 +15,11 @@ class BrandServiceRepository implements BrandRepositoryInterface
     {
         return $this->brandRepository->all();
     }
+
+    public function update (int $id, array $attributes)
+    {
+        return  $this->brandRepository->update($id, $attributes);
+    }
     public function inRandomOrder($count=1):Collection
     {
         return $this->brandRepository->inRandomOrder($count);
