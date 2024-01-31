@@ -16,6 +16,7 @@ services:
 
     mysql:
         image: mysql:latest
+        command: --max_allowed_packet=32505856
         environment:
             MYSQL_ROOT_PASSWORD: "Ehsan"
             MYSQL_DATABASE: "store_db"
@@ -34,7 +35,8 @@ services:
        ports:
          - "8080:80"
        environment:
-         PMA_ARBITRARY: 1
+           - UPLOAD_LIMIT=1G
+           - PMA_ARBITRARY=1
     kibana:
         image: docker.elastic.co/kibana/kibana:8.12.0
         ports:
