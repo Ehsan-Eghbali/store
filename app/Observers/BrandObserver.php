@@ -2,6 +2,7 @@
 
     namespace App\Observers;
 
+    use App\Jobs\SyncChangeLogToElastic;
     use App\Models\Brand;
     use App\Services\ChangeLog\ChangeLogServiceRepository;
     use App\Services\ElasticSearch\ElasticSearchServiceRepository;
@@ -27,6 +28,7 @@
         public function updated (Brand $brand): void
         {
             $changes = $brand->getDirty();
+            unset($changes['updated_at']);
             foreach ($changes as $field => $new) {
                 $old = $brand->getOriginal($field);
                 $t = $this->changeLogServiceRepository->create([
@@ -37,6 +39,7 @@
                         'loggable_type' => get_class($brand),
                     ],
                 );
+                dispatch_sync(new SyncChangeLogToElastic($t));
             }
         }
 

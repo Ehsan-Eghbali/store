@@ -6,5 +6,5 @@ namespace App\Repositories;
 interface ProductRepositoryInterface
 {
     public function transferDataToElastic(int $batchSize,int $lastId);
-    public function search($request);
+    public function search($request,$filter = null);
 }

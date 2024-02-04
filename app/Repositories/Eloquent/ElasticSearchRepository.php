@@ -23,7 +23,7 @@
 
         }
 
-        public function indexDocument ($type, $id, $document)
+        public function indexDocument($type, $id, $document): \Elastic\Elasticsearch\Response\Elasticsearch|\Http\Promise\Promise
         {
             $params = [
                 'index' => INDEX,
@@ -35,48 +35,106 @@
             return $this->clientBuilder->index($params);
         }
 
-        public function updateDocument ($id, $document, $newDocument)
+        public function updateDocument($id, $document, $newDocument): \Elastic\Elasticsearch\Response\Elasticsearch|\Http\Promise\Promise
         {
             $params = [
                 'index' => INDEX,
                 'id' => $id,
                 'body' => [
-                    'doc' => [
-                        "'$document'" => $newDocument,
+                    'script' => [
+                        'source' => 'ctx._source.' . $document . ' = params.new_value',
+                        'params' => [
+                            'new_value' => $newDocument,
+                        ],
                     ],
                 ],
             ];
-
             return $this->clientBuilder->update($params);
         }
 
-        public function searchDocument ($query,int $page=1, int $perPage=12)
+        public function searchDocument($query, int $page = 1, int $perPage = 12, ?array $filter = null, ?array $source = null): array
         {
+            // Validate parameters
+            $page = max(1, $page);
+            $perPage = max(1, $perPage);
+
+            // Reusable query array
+            $queryArray = [
+                'range' => ['count' => ['gt' => 0]],
+            ];
+
+            $multiMatchQuery = $this->buildMultiMatchQuery($query);
+
             $params = [
                 'index' => INDEX,
                 'body' => [
                     'query' => [
                         'bool' => [
-                            'must' => [
-                                ['range' => ['count' => ['gt' => 0]]],
-                                [
-                                    'multi_match' => [
-                                        'query' => $query,
-                                        'operator' => 'OR',
-                                        'analyzer' => 'standard',
-                                        'fields' => ['name', 'brand.name'],
-                                        "type"=> "best_fields",
-                                    ],
-                                ],
-                            ],
+                            'must' => [$queryArray, $multiMatchQuery],
                         ],
                     ],
-                    'from' => ($page - 1) * $perPage, // Calculate the starting index based on the current page
-                    'size' => $perPage, // Number of results to return per page
+                    'from' => ($page - 1) * $perPage,
+                    'size' => $perPage,
                 ],
             ];
 
+            $this->addFilterConditions($params, $filter);
+            $this->addSourceFilter($params, $source);
+
+            // Perform the search
             $response = $this->clientBuilder->search($params);
-            return $response['hits']['hits'];
+
+            // Calculate total count
+            $countParams = ['index' => INDEX, 'body' => ['query' => ['bool' => ['must' => [$queryArray, $multiMatchQuery]]]]];
+            $this->addFilterConditions($countParams, $filter);
+            $totalCount = $this->getTotalCount($countParams);
+
+            // Calculate the last page number
+            $lastPage = max(1, ceil($totalCount / $perPage));
+
+            return [
+                'data' => $response['hits']['hits'],
+                'total' => (int) $totalCount,
+                'last_page' => (int) $lastPage,
+            ];
+        }
+
+        private function buildMultiMatchQuery(string $query): array
+        {
+            if ($query !== "") {
+                return [
+                    'multi_match' => [
+                        'query' => $query,
+                        'operator' => 'OR',
+                        'analyzer' => 'standard',
+                        'fields' => ['name', 'brand.name', 'categories.name'],
+                        'type' => 'best_fields',
+                    ],
+                ];
+            } else {
+                return ['match_all' => (object) []];
+            }
+        }
+
+        private function addFilterConditions(array &$params, ?array $filter): void
+        {
+            if ($filter !== null) {
+                $params['body']['query']['bool']['filter'] = array_map(function ($key, $value) {
+                    return ['match' => ["$key.id" => $value]];
+                }, array_keys($filter), $filter);
+            }
+        }
+
+        private function addSourceFilter(array &$params, ?array $source): void
+        {
+            if ($source !== null) {
+                $params['body']['_source'] = $source;
+            }
+        }
+
+        private function getTotalCount(array $countParams): int
+        {
+            $countResponse = $this->clientBuilder->count($countParams);
+            return $countResponse['count'];
         }
     }

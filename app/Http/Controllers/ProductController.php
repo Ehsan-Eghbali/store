@@ -77,6 +77,7 @@ class ProductController extends Controller
         $request->validate([
             'q'=>'required'
         ]);
-        return $this->productServiceRepository->search($request);
+        $filter = $request->except('q');
+        return $this->productServiceRepository->search($request,$filter);
     }
 }
