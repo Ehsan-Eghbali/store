@@ -68,12 +68,12 @@
             $aggregation = [
                 'category_agg' => [
                     'terms' => [
-                        'field' => 'categories.name.keyword', // Assuming it's a keyword field
+                        'field' => 'categories.id', // Assuming it's a keyword field
                     ],
                 ],
                 'brand_agg' => [
                     'terms' => [
-                        'field' => 'brand.name.keyword', // Assuming it's a keyword field
+                        'field' => 'brand.id', // Assuming it's a keyword field
                     ],
                 ],
             ];
@@ -140,7 +140,7 @@
         {
             if ($filter !== null) {
                 $params['body']['query']['bool']['filter'] = array_map(function ($key, $value) {
-                    return ['terms' => ["$key.name.keyword" => [$value]]];
+                    return ['terms' => ["$key.id" => [$value]]];
                 }, array_keys($filter), $filter);
             }
         }
