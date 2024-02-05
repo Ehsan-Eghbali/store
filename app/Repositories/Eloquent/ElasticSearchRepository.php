@@ -70,10 +70,25 @@
                     'terms' => [
                         'field' => 'categories.id', // Assuming it's a keyword field
                     ],
+                    'aggs' => [
+                        'top_category_hits' => [
+                            'top_hits' => [
+                                '_source' => ['includes' => ['categories.name','categories.id']],
+                            ],
+                        ],
+                    ],
+
                 ],
                 'brand_agg' => [
                     'terms' => [
                         'field' => 'brand.id', // Assuming it's a keyword field
+                    ],
+                    'aggs' => [
+                        'top_brand_hits' => [
+                            'top_hits' => [
+                                '_source' => ['includes' => ['brand.name','brand.id']],
+                            ],
+                        ],
                     ],
                 ],
             ];
@@ -139,11 +154,13 @@
         private function addFilterConditions(array &$params, ?array $filter): void
         {
             if ($filter !== null) {
-                $params['body']['query']['bool']['filter'] = array_map(function ($key, $value) {
-                    return ['terms' => ["$key.id" => [$value]]];
+                $formattedFilter = array_map(function ($key, $value) {
+                    return ['terms' => ["$key.id" => explode(',', $value)]];
                 }, array_keys($filter), $filter);
+                $params['body']['query']['bool']['filter'] = array_merge($params['body']['query']['bool']['filter'] ?? [], $formattedFilter);
             }
         }
+
 
         private function addSourceFilter(array &$params, ?array $source): void
         {
