@@ -31,7 +31,7 @@ class SyncChangeLogToElastic implements ShouldQueue
     {
         $this->elasticSearchServiceRepository = resolve(ElasticSearchRepositoryInterface::class);
         $t = [
-            'brand'=>"1"
+            'brand.name'=>"test"
         ];
         $data = $this->elasticSearchServiceRepository->searchDocument("",1,12,$t,['id']);
         foreach ($data['data'] as $list){

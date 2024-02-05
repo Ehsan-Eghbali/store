@@ -65,6 +65,19 @@
 
             $multiMatchQuery = $this->buildMultiMatchQuery($query);
 
+            $aggregation = [
+                'category_agg' => [
+                    'terms' => [
+                        'field' => 'categories.name.keyword', // Assuming it's a keyword field
+                    ],
+                ],
+                'brand_agg' => [
+                    'terms' => [
+                        'field' => 'brand.name.keyword', // Assuming it's a keyword field
+                    ],
+                ],
+            ];
+
             $params = [
                 'index' => INDEX,
                 'body' => [
@@ -73,16 +86,21 @@
                             'must' => [$queryArray, $multiMatchQuery],
                         ],
                     ],
+                    'aggs' => $aggregation, // Add the aggregation here
                     'from' => ($page - 1) * $perPage,
                     'size' => $perPage,
                 ],
             ];
+
 
             $this->addFilterConditions($params, $filter);
             $this->addSourceFilter($params, $source);
 
             // Perform the search
             $response = $this->clientBuilder->search($params);
+
+            // Extract aggregation results
+            $aggregationResults = $response['aggregations'] ?? [];
 
             // Calculate total count
             $countParams = ['index' => INDEX, 'body' => ['query' => ['bool' => ['must' => [$queryArray, $multiMatchQuery]]]]];
@@ -94,10 +112,12 @@
 
             return [
                 'data' => $response['hits']['hits'],
+                'aggregations' => $aggregationResults, // Include aggregation results in the response
                 'total' => (int) $totalCount,
                 'last_page' => (int) $lastPage,
             ];
         }
+
 
         private function buildMultiMatchQuery(string $query): array
         {
@@ -107,7 +127,7 @@
                         'query' => $query,
                         'operator' => 'OR',
                         'analyzer' => 'standard',
-                        'fields' => ['name', 'brand.name', 'categories.name'],
+                        'fields' => ['name'],
                         'type' => 'best_fields',
                     ],
                 ];
@@ -120,7 +140,7 @@
         {
             if ($filter !== null) {
                 $params['body']['query']['bool']['filter'] = array_map(function ($key, $value) {
-                    return ['match' => ["$key.id" => $value]];
+                    return ['terms' => ["$key.name.keyword" => [$value]]];
                 }, array_keys($filter), $filter);
             }
         }
