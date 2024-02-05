@@ -66,20 +66,21 @@
             $multiMatchQuery = $this->buildMultiMatchQuery($query);
 
             $aggregation = [
-                'category_agg' => [
-                    'terms' => [
-                        'field' => 'categories.id', // Assuming it's a keyword field
-                    ],
-                    'aggs' => [
-                        'top_category_hits' => [
-                            'top_hits' => [
-                                '_source' => ['includes' => ['categories.name','categories.id']],
-                            ],
-                        ],
-                    ],
-
-                ],
-                'brand_agg' => [
+                'category' => $this->createTermAggregation('categories.id', 10, ['categories.name','categories.id']),
+//                'category' => [
+//                    'terms' => [
+//                        'field' => 'categories.id', // Assuming it's a keyword field
+//                    ],
+//                    'aggs' => [
+//                        'top_category_hits' => [
+//                            'top_hits' => [
+//                                '_source' => ['includes' => ['categories.name','categories.id']],
+//                            ],
+//                        ],
+//                    ],
+//
+//                ],
+                'brand' => [
                     'terms' => [
                         'field' => 'brand.id', // Assuming it's a keyword field
                     ],
@@ -127,12 +128,30 @@
 
             return [
                 'data' => $response['hits']['hits'],
-                'aggregations' => $aggregationResults, // Include aggregation results in the response
-                'total' => (int) $totalCount,
-                'last_page' => (int) $lastPage,
+                'filters' => $aggregationResults,
+                'paginate_data' => [
+                    'total' => (int) $totalCount,
+                    'last_page' => (int) $lastPage,
+                ],
             ];
         }
+        private function createTermAggregation($field, $size, $includes = []): array
+        {
+            $aggregation = [
+                'terms' => ['field' => $field, 'size' => $size],
+            ];
 
+            if (!empty($includes)) {
+                $aggregation['aggregations']['top_hits'] = [
+                    'top_hits' => [
+                        'size' => 1,
+                        '_source' => ['includes' => $includes],
+                    ],
+                ];
+            }
+
+            return $aggregation;
+        }
 
         private function buildMultiMatchQuery(string $query): array
         {
