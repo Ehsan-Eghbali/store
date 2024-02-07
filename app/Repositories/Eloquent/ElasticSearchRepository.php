@@ -66,26 +66,25 @@
             $multiMatchQuery = $this->buildMultiMatchQuery($query);
 
             $aggregation = [
-                'category' => $this->createTermAggregation('categories.id', 10, ['categories.name','categories.id']),
-//                'category' => [
-//                    'terms' => [
-//                        'field' => 'categories.id', // Assuming it's a keyword field
-//                    ],
-//                    'aggs' => [
-//                        'top_category_hits' => [
-//                            'top_hits' => [
-//                                '_source' => ['includes' => ['categories.name','categories.id']],
-//                            ],
-//                        ],
-//                    ],
-//
-//                ],
-                'brand' => [
+                'categories' => [
+                    'terms' => [
+                        'field' => 'categories.id', // Assuming it's a keyword field
+                    ],
+                    'aggs' => [
+                        'top_hits' => [
+                            'top_hits' => [
+                                "size"=> 100,
+                                '_source' => ['includes' => ['categories.name']],
+                            ],
+                        ],
+                    ],
+                ],
+                'brands' => [
                     'terms' => [
                         'field' => 'brand.id', // Assuming it's a keyword field
                     ],
                     'aggs' => [
-                        'top_brand_hits' => [
+                        'top_hits' => [
                             'top_hits' => [
                                 '_source' => ['includes' => ['brand.name','brand.id']],
                             ],
@@ -111,13 +110,12 @@
 
             $this->addFilterConditions($params, $filter);
             $this->addSourceFilter($params, $source);
-
             // Perform the search
             $response = $this->clientBuilder->search($params);
-
             // Extract aggregation results
-            $aggregationResults = $response['aggregations'] ?? [];
-
+            $aggregationResults = $this->formatAggregations($response['aggregations'] )?? [];
+            return $aggregationResults;
+//            dd($aggregationResults);
             // Calculate total count
             $countParams = ['index' => INDEX, 'body' => ['query' => ['bool' => ['must' => [$queryArray, $multiMatchQuery]]]]];
             $this->addFilterConditions($countParams, $filter);
@@ -129,29 +127,40 @@
             return [
                 'data' => $response['hits']['hits'],
                 'filters' => $aggregationResults,
-                'paginate_data' => [
-                    'total' => (int) $totalCount,
-                    'last_page' => (int) $lastPage,
-                ],
+//                'paginate_data' => [
+//                    'total' => (int) $totalCount,
+//                    'last_page' => (int) $lastPage,
+//                ],
             ];
         }
-        private function createTermAggregation($field, $size, $includes = []): array
+        public function formatAggregations(array $aggregationResults): array
         {
-            $aggregation = [
-                'terms' => ['field' => $field, 'size' => $size],
-            ];
+            $formattedAggregations = [];
 
-            if (!empty($includes)) {
-                $aggregation['aggregations']['top_hits'] = [
-                    'top_hits' => [
-                        'size' => 1,
-                        '_source' => ['includes' => $includes],
-                    ],
-                ];
+            foreach ($aggregationResults as $aggKey => $aggValue) {
+                $formattedBuckets = [];
+
+                foreach ($aggValue['buckets'] ?? [] as $bucket) {
+                    // Ensure 'top_hits' key and its sub-keys are set before accessing
+                    if (isset($bucket['top_hits']['hits']['hits'])) {
+                        foreach ($bucket['top_hits']['hits']['hits'] as $hit) {
+                            if (isset($hit['_source'])) {
+                                // Extract the first value from _source and add to formattedBuckets
+                                $formattedBuckets[] = reset($hit['_source']);
+                            }
+                        }
+                    }
+                }
+
+                // Remove duplicates from formattedBuckets and reset array keys
+                $formattedAggregations[$aggKey] = array_values(array_unique($formattedBuckets, SORT_REGULAR));
             }
 
-            return $aggregation;
+            return $formattedAggregations;
         }
+
+
+
 
         private function buildMultiMatchQuery(string $query): array
         {
@@ -194,3 +203,179 @@
             return $countResponse['count'];
         }
     }
+
+//    $queryArray = [
+//        'bool' => [
+//            'must' => [
+//                [
+//                    'query_string' => [
+//                        'query' => '(total_qty:>0)',
+//                    ],
+//                ],
+//                [
+//                    'multi_match' => [
+//                        'query' => $query,
+//                        'fields' => ['product_name^10', 'product_description_short^4'],
+//                        'type' => 'best_fields',
+//                        'analyzer' => 'standard',
+//                        'operator' => 'or',
+//                        'minimum_should_match' => '3<80%',
+//                    ],
+//                ],
+//                [
+//                    'terms' => [
+//                        'visibility' => ['search', 'both'],
+//                    ],
+//                ],
+//                [
+//                    'range' => [
+//                        'active' => ['gt' => 0],
+//                    ],
+//                ],
+//                [
+//                    'range' => [
+//                        'show_price' => ['gt' => 0],
+//                    ],
+//                ],
+//                [
+//                    'range' => [
+//                        'active_only_one_barcode' => ['gt' => 0],
+//                    ],
+//                ],
+//            ],
+//        ],
+//    ];
+//
+//    $aggregation = [
+//        'colors' => [
+//            'terms' => [
+//                'field' => 'color_name.keyword',
+//                'size' => 1000,
+//            ],
+//            'aggregations' => [
+//                'top_color_hits' => [
+//                    'top_hits' => [
+//                        'size' => 1,
+//                        '_source' => [
+//                            'includes' => ['color_value', 'id_color'],
+//                        ],
+//                    ],
+//                ],
+//            ],
+//        ],
+//        'color_groups' => [
+//            'terms' => [
+//                'field' => 'id_color_group',
+//                'size' => 1000,
+//            ],
+//            'aggregations' => [
+//                'top_color_group_hits' => [
+//                    'top_hits' => [
+//                        'size' => 1,
+//                        '_source' => [
+//                            'includes' => ['color_groups_color', 'color_groups_title', 'color_groups_icon'],
+//                        ],
+//                    ],
+//                ],
+//            ],
+//        ],
+//        'sizes' => [
+//            'terms' => [
+//                'field' => 'size.name.keyword',
+//                'size' => 1000,
+//            ],
+//            'aggregations' => [
+//                'top_size_hits' => [
+//                    'top_hits' => [
+//                        'size' => 1,
+//                        '_source' => [
+//                            'includes' => ['size'],
+//                        ],
+//                    ],
+//                ],
+//            ],
+//        ],
+//        'manufacturers' => [
+//            'terms' => [
+//                'field' => 'product_manufacturer_name.keyword',
+//                'size' => 1000,
+//            ],
+//            'aggregations' => [
+//                'top_brand_hits' => [
+//                    'top_hits' => [
+//                        'size' => 1,
+//                        '_source' => [
+//                            'includes' => ['product_manufacturer_en_name', 'product_manufacturer_id'],
+//                        ],
+//                    ],
+//                ],
+//            ],
+//        ],
+//        'categories' => [
+//            'nested' => [
+//                'path' => 'product_categories_nested',
+//            ],
+//            'aggregations' => [
+//                'cat_ids' => [
+//                    'terms' => [
+//                        'field' => 'product_categories_nested.id',
+//                        'size' => 1000,
+//                    ],
+//                    'aggregations' => [
+//                        'cat_level' => [
+//                            'terms' => [
+//                                'field' => 'product_categories_nested.level',
+//                            ],
+//                        ],
+//                        'cat_parent' => [
+//                            'terms' => [
+//                                'field' => 'product_categories_nested.parent_id',
+//                            ],
+//                        ],
+//                    ],
+//                ],
+//            ],
+//        ],
+//        'features' => [
+//            'terms' => [
+//                'field' => 'product_features.filter.keyword',
+//                'size' => 1000,
+//            ],
+//        ],
+//        'max_price' => [
+//            'max' => [
+//                'field' => 'product_final_price',
+//            ],
+//        ],
+//    ];
+//
+//    $sort = [
+//        [
+//            'has_qty' => [
+//                'order' => 'desc',
+//            ],
+//        ],
+//        [
+//            '_score' => [],
+//        ],
+//        [
+//            'product_categories_sort.position_sort_double_new' => [
+//                'mode' => 'min',
+//                'order' => 'asc',
+//                'nested' => [
+//                    'path' => 'product_categories_sort',
+//                ],
+//            ],
+//        ],
+//    ];
+//
+//    $params = [
+//        'index' => INDEX,
+//        'body' => [
+//            'query' => $queryArray,
+//            'aggs' => $aggregation,
+//            'sort' => $sort,
+//            'from' => ($page - 1) * $perPage,
+//            'size' => $perPage,
+//        ],
+//    ];
