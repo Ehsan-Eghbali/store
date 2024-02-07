@@ -42,19 +42,19 @@ class SyncChangeLogToElastic implements ShouldQueue
         ];
 
         // Perform initial search to get total number of pages
-        $data = $this->elasticSearchServiceRepository->searchDocument("", 1, 100, $filter, ['id']);
+        $data = $this->elasticSearchServiceRepository->searchDocument("", 1, 1000, $filter, ['id']);
         $totalPages = $data['paginate_data']['last_page'];
 
         // Iterate through each page
         for ($i = 1; $i <= $totalPages; $i++) {
             // Retrieve data for current page
-            $data = $this->elasticSearchServiceRepository->searchDocument("", $i, 100, $filter, ['id']);
+            $data = $this->elasticSearchServiceRepository->searchDocument("", $i, 1000, $filter, ['id']);
 
             // Update documents on current page
             foreach ($data['data'] as $document) {
-                $this->elasticSearchServiceRepository->updateDocument((int)$document['_id'], $model.$this->changeLog->field, $this->changeLog->new_value);
+                $this->elasticSearchServiceRepository->updateDocument((int)$document['_id'], $model.".".$this->changeLog->field, $this->changeLog->new_value);
             }
         }
-
+        dd($data['data']);
     }
 }
