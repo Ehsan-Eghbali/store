@@ -11,6 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class SyncChangeLogToElastic implements ShouldQueue
 {
@@ -29,13 +30,30 @@ class SyncChangeLogToElastic implements ShouldQueue
      */
     public function handle(): void
     {
+        // Resolve ElasticSearchRepositoryInterface instance through dependency injection
         $this->elasticSearchServiceRepository = resolve(ElasticSearchRepositoryInterface::class);
-        $t = [
-            'brand.name'=>"test"
+
+        // Extract model name from loggable_type
+        $model = strtolower(class_basename($this->changeLog->loggable_type));
+
+        // Define filter
+        $filter = [
+            $model => $this->changeLog->loggable_id
         ];
-        $data = $this->elasticSearchServiceRepository->searchDocument("",1,12,$t,['id']);
-        foreach ($data['data'] as $list){
-            $this->elasticSearchServiceRepository->updateDocument($list['_id'],"brand.name",$this->changeLog->new_value);
+
+        // Perform initial search to get total number of pages
+        $data = $this->elasticSearchServiceRepository->searchDocument("", 1, 100, $filter, ['id']);
+        $totalPages = $data['paginate_data']['last_page'];
+
+        // Iterate through each page
+        for ($i = 1; $i <= $totalPages; $i++) {
+            // Retrieve data for current page
+            $data = $this->elasticSearchServiceRepository->searchDocument("", $i, 100, $filter, ['id']);
+
+            // Update documents on current page
+            foreach ($data['data'] as $document) {
+                $this->elasticSearchServiceRepository->updateDocument((int)$document['_id'], $model.$this->changeLog->field, $this->changeLog->new_value);
+            }
         }
 
     }
