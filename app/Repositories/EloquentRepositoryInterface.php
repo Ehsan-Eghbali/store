@@ -16,5 +16,5 @@ interface EloquentRepositoryInterface
 
     public function update(int $id, array $attributes): bool;
 
-    public function where(string $column, mixed $operator = '=', mixed $value = null ,array $with = [] ): ?Model;
+    public function where(string $column, mixed $operator = '=', mixed $value = null ,array $with = [] ): array|\Illuminate\Database\Eloquent\Collection;
 }

@@ -9,7 +9,10 @@
 	{
 
         public function indexDocument ( $type, $id, $document);
+        public function indexDocuments($type, $documents);
+
         public function updateDocument ($id, $document,$newDocument);
         public function searchDocument ($query, int $page = 1, int $perPage = 120, ?array $filter = null, ?array $source = null);
+
 
 	}

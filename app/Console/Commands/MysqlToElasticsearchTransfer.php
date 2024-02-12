@@ -14,7 +14,7 @@
          *
          * @var string
          */
-        protected $signature = 'transfer:mysql-to-elasticsearch';
+        protected $signature = 'transfer:mysql-to-elasticsearch {--chunk-size=500 : The size of chunks to transfer}';
 
         /**
          * The console command description.
@@ -35,24 +35,24 @@
         public function handle ()
         {
             $this->info('Transferring data from MySQL to Elasticsearch...');
-            $batchSize = 500; // Adjust the batch size based on your needs
-            $lastId = 600000;
+
+            $batchSize = $this->option('chunk-size');
+            $lastId = 0;
             do {
+                $startTime = microtime(true);
                 $products = $this->productServiceRepository->transferDataToElastic($batchSize,$lastId);
                 if ($products->count() > 0) {
-                    foreach ($products as $product) {
-                        $body = $product->toArray();
-                        $this->elasticSearchServiceRepository->indexDocument(
-                            '_doc',
-                            $product->id,
-                            $body,
-                        );
-                        $lastId = $product->id;
-
-                        $this->info('Transferring data product id =>'.$product->id);
-                    }
+                    $this->elasticSearchServiceRepository->indexDocuments(
+                        '_doc',
+                        $products
+                    );
+                    $lastId = $products->last()->id;
+                    $endTime = microtime(true); // End time tracking
+                    $totalTime = $endTime - $startTime; // Calculate total time
+                    $this->info('Data transfer ID '.$lastId-$batchSize.'-'.$lastId.' completed in ' . $totalTime . ' seconds.');
                 }
             } while ($products->count() > 0);
-            $this->info('Data transfer completed.');
+
+            $this->info('Data transfer completed');
         }
     }

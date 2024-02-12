@@ -48,8 +48,8 @@ class BaseRepository implements EloquentRepositoryInterface
         return $model->update($attributes);
     }
 
-    public function where(string $column, mixed $operator = '=', mixed $value =null ,array $with = []): ?Model
+    public function where(string $column, mixed $operator = '=', mixed $value =null ,array $with = []): array|\Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->with($with)->where($column,$operator,$value)->first();
+        return $this->model->with($with)->where($column,$operator,$value)->get();
     }
 }

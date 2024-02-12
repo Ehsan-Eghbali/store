@@ -35,6 +35,21 @@
             return $this->clientBuilder->index($params);
         }
 
+        public function indexDocuments($type, $documents): \Elastic\Elasticsearch\Response\Elasticsearch|\Http\Promise\Promise
+        {
+
+            foreach ($documents as $product) {
+                $params['body'][] = [
+                    'index' => [
+                        '_index' => INDEX,
+                        '_id' => $product->id,
+                    ]
+                ];
+                $params['body'][] = $product->toArray();
+            }
+            return $this->clientBuilder->bulk($params);
+        }
+
         public function updateDocument($id, $document, $newDocument): \Elastic\Elasticsearch\Response\Elasticsearch|\Http\Promise\Promise
         {
             $params = [

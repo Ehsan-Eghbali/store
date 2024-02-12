@@ -20,7 +20,7 @@ class ProductController extends Controller
     public function index()
     {
 
-        return $this->productServiceRepository->transferDataToElastic(5000,1);
+        return $this->productServiceRepository->transferDataToElastic(10,1);
     }
 
     /**

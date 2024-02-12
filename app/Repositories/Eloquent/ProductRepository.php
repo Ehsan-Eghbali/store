@@ -20,7 +20,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
         return $this->model::with('categories:id,name,parent_id','categories.categoryParent:id,name,parent_id','brand:id,name')
             ->select(['id','name','price','count','brand_id'])
             ->orderBy('id')
-            ->where('id', '>', $lastId)
+            ->offset($lastId)
             ->take($batchSize)
             ->get();
     }

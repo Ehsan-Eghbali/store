@@ -16,6 +16,11 @@ class CategoryServiceRepository  implements CategoryRepositoryInterface
     {
         return $this->categoryRepository->all();
     }
+
+    public function where (string $column, mixed $operator = '=', mixed $value =null ,array $with = []): array|\Illuminate\Database\Eloquent\Collection
+    {
+        return $this->categoryRepository->where($column,$operator,$value,$with);
+    }
     public function inRandomOrder($count=1): Collection
     {
         return $this->categoryRepository->inRandomOrder($count);

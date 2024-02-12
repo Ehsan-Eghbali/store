@@ -28,4 +28,9 @@ class ElasticSearchServiceRepository implements ElasticSearchRepositoryInterface
     {
         return $this->elasticSearchRepository->searchDocument($query,$page,$perPage,$filter,$source);
     }
+
+    public function indexDocuments ($type, $documents)
+    {
+        return $this->elasticSearchRepository->indexDocuments($type,$documents);
+    }
 }
