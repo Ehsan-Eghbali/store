@@ -138,21 +138,19 @@
             $response = $this->clientBuilder->search($params);
             // Extract aggregation results
             $aggregationResults = $this->formatAggregations($response['aggregations'] )?? [];
-            // Calculate total count
-            $countParams = ['index' => INDEX, 'body' => ['query' => ['bool' => ['must' => [$queryArray, $multiMatchQuery]]]]];
-            $this->addFilterConditions($countParams, $filter);
-            $totalCount = $this->getTotalCount($countParams);
-
+            $totalCount  = $response['hits']['total']['value'];
             // Calculate the last page number
             $lastPage = max(1, ceil($totalCount / $perPage));
 
             return [
-                'data' => $response['hits']['hits'],
+
+                'data' =>$response['hits']['hits'],
                 'filters' => $aggregationResults,
                 'paginate_data' => [
                     'total' => (int) $totalCount,
                     'last_page' => (int) $lastPage,
                 ],
+
             ];
         }
         public function formatAggregations(array $aggregationResults): array
@@ -219,11 +217,6 @@
             }
         }
 
-        private function getTotalCount(array $countParams): int
-        {
-            $countResponse = $this->clientBuilder->count($countParams);
-            return $countResponse['count'];
-        }
     }
 
 //

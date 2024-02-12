@@ -27,7 +27,7 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function search ($request,$filter = null)
     {
-        $query = $request->get('q');
+        $query = $request->get('q') ??"";
         $page = $request->get('page') ?? 1;
         $perPage = $request->get('perPage') ?? 12;
         return $this->elasticSearchServiceRepository->searchDocument($query,(int) $page, (int) $perPage,$filter);
