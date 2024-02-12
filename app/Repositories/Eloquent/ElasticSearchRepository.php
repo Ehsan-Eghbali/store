@@ -45,7 +45,12 @@
                         '_id' => $product->id,
                     ]
                 ];
-                $params['body'][] = $product->toArray();
+                $productData = $product->toArray();
+//                $productData['date'] = date('Y-m-d\TH:i:s', strtotime($productData['date']));
+//                $productData['date'] = $productData['date'];
+                $productData['price'] = (float) $productData['price'];
+
+                $params['body'][] = $productData;
             }
             return $this->clientBuilder->bulk($params);
         }
@@ -67,7 +72,7 @@
             return $this->clientBuilder->update($params);
         }
 
-        public function searchDocument($query, int $page = 1, int $perPage = 12, ?array $filter = null, ?array $source = null): array
+        public function searchDocument($query, int $page = 1, int $perPage = 12, ?array $filter = null, ?array $source = null,?array $sort = null): array
         {
             // Validate parameters
             $page = max(1, $page);
@@ -76,6 +81,7 @@
             // Reusable query array
             $queryArray = [
                 'range' => ['count' => ['gt' => 0]],
+                'range' => ['price'=>   ['gt'=>0]],
             ];
 
             $multiMatchQuery = $this->buildMultiMatchQuery($query);
@@ -135,7 +141,9 @@
             $this->addFilterConditions($params, $filter);
             $this->addSourceFilter($params, $source);
             // Perform the search
+            $this->addSort($params,$sort);
             $response = $this->clientBuilder->search($params);
+
             // Extract aggregation results
             $aggregationResults = $this->formatAggregations($response['aggregations'] )?? [];
             $totalCount  = $response['hits']['total']['value'];
@@ -214,6 +222,22 @@
         {
             if ($source !== null) {
                 $params['body']['_source'] = $source;
+            }
+        }
+
+        private function addSort (array &$params, ?array $sortData)
+        {
+
+            if ($sortData!==null){
+                $sort = [];
+                foreach ($sortData['sort'] as $order => $field) {
+                    $sort[] = [
+                        $field => [
+                            'order' => $order
+                        ]
+                    ];
+                }
+                $params['body']['sort'] = $sort;
             }
         }
 

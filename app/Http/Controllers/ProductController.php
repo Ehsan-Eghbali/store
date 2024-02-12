@@ -75,8 +75,9 @@ class ProductController extends Controller
     public function search (SearchProductRequest $request)
     {
         try {
-            $filter = $request->except('q');
-            $data = $this->productServiceRepository->search($request, $filter);
+            $filter = $request->except('q','sort');
+            $sort = $request->only('sort');
+            $data = $this->productServiceRepository->search($request, $filter,$sort);
 
             // Determine the status code based on conditions
             $statusCode = $this->getStatusCode($data);

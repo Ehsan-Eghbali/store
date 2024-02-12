@@ -18,8 +18,8 @@ class ProductServiceRepository implements ProductRepositoryInterface
         return $this->productRepository->transferDataToElastic($batchSize,$lastId);
     }
 
-    public function search ($request,$filter = null)
+    public function search ($request,$filter = null,?array $sort = null)
     {
-        return $this->productRepository->search($request,$filter);
+        return $this->productRepository->search($request,$filter,$sort);
     }
 }

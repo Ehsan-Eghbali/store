@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Repositories\Eloquent\BaseRepository;
 use App\Repositories\ProductRepositoryInterface;
 use App\Services\ElasticSearch\ElasticSearchServiceRepository;
+use Illuminate\Support\Facades\DB;
 
 
 class ProductRepository extends BaseRepository implements ProductRepositoryInterface
@@ -18,18 +19,25 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     public function transferDataToElastic(int $batchSize,int $lastId)
     {
         return $this->model::with('categories:id,name,parent_id','categories.categoryParent:id,name,parent_id','brand:id,name')
-            ->select(['id','name','price','count','brand_id'])
+            ->select([
+                'id',
+                'name',
+                'price',
+                'count',
+                'brand_id',
+                'created_at',
+            ])
             ->orderBy('id')
             ->offset($lastId)
             ->take($batchSize)
             ->get();
     }
 
-    public function search ($request,$filter = null)
+    public function search ($request,$filter = null,?array $sort = null)
     {
         $query = $request->get('q') ??"";
         $page = $request->get('page') ?? 1;
         $perPage = $request->get('perPage') ?? 12;
-        return $this->elasticSearchServiceRepository->searchDocument($query,(int) $page, (int) $perPage,$filter);
+        return $this->elasticSearchServiceRepository->searchDocument($query,(int) $page, (int) $perPage,$filter,null,$sort);
     }
 }

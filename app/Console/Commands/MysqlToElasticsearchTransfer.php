@@ -41,6 +41,7 @@
             do {
                 $startTime = microtime(true);
                 $products = $this->productServiceRepository->transferDataToElastic($batchSize,$lastId);
+//                dd($products->first()->created_at);
                 if ($products->count() > 0) {
                     $this->elasticSearchServiceRepository->indexDocuments(
                         '_doc',

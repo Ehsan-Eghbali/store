@@ -24,9 +24,9 @@ class ElasticSearchServiceRepository implements ElasticSearchRepositoryInterface
         return $this->elasticSearchRepository->updateDocument($id, $document,$newDocument);
     }
 
-    public function searchDocument ($query,$page=1,$perPage=12,$filter = null,$source = null)
+    public function searchDocument ($query,$page=1,$perPage=12,$filter = null,$source = null,?array $sort = null)
     {
-        return $this->elasticSearchRepository->searchDocument($query,$page,$perPage,$filter,$source);
+        return $this->elasticSearchRepository->searchDocument($query,$page,$perPage,$filter,$source,$sort);
     }
 
     public function indexDocuments ($type, $documents)
