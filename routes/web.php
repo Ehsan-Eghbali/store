@@ -22,7 +22,13 @@
         'product' => ProductController::class,
     ]);
     Route::get('/token', function () {
-        return csrf_token();
+        return class_exists('App\Models\Brand');
+//        return csrf_token();
     });
     Route::get('/products/search', [ProductController::class, 'search']);
 
+
+
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});

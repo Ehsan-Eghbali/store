@@ -46,8 +46,6 @@
                     ]
                 ];
                 $productData = $product->toArray();
-//                $productData['date'] = date('Y-m-d\TH:i:s', strtotime($productData['date']));
-//                $productData['date'] = $productData['date'];
                 $productData['price'] = (float) $productData['price'];
 
                 $params['body'][] = $productData;
@@ -95,7 +93,7 @@
                     'aggs' => [
                         'top_hits' => [
                             'top_hits' => [
-                                "size" => 1,
+                                "size" => 100,
                                 '_source' => ['includes' => ['categories.id', 'categories.name']],
                             ],
                         ],
@@ -112,10 +110,12 @@
                 'brands' => [
                     'terms' => [
                         'field' => 'brand.id', // Assuming it's a keyword field
+                        "size" => 100,
                     ],
                     'aggs' => [
                         'top_hits' => [
                             'top_hits' => [
+                                "size" => 100,
                                 '_source' => ['includes' => ['brand.name','brand.id']],
                             ],
                         ],
@@ -141,7 +141,10 @@
             $this->addFilterConditions($params, $filter);
             $this->addSourceFilter($params, $source);
             // Perform the search
-            $this->addSort($params,$sort);
+            if ($sort){
+                $this->addSort($params,$sort);
+
+            }
             $response = $this->clientBuilder->search($params);
 
             // Extract aggregation results
@@ -227,7 +230,6 @@
 
         private function addSort (array &$params, ?array $sortData)
         {
-
             if ($sortData!==null){
                 $sort = [];
                 foreach ($sortData['sort'] as $order => $field) {

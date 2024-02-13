@@ -153,7 +153,7 @@ class ProductFactory extends Factory
     {
         return $this->afterCreating(function (Product $product) {
             $categoryServiceRepository = app(CategoryServiceRepository::class);
-            $categories = $categoryServiceRepository->inRandomOrder(rand(1, 5));
+            $categories = $categoryServiceRepository->inRandomOrder(1);
             $product->categories()->attach($categories);
         });
     }
