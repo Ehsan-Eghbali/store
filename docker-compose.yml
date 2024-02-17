@@ -1,25 +1,25 @@
 version: '5'
 services:
-    app:
-        image: storeapp:2.2.8
-        ports:
-            - "8000:8000"
-        volumes:
-            - .:/var/www/html
+#    app:
+#        build:
+#            image: storeapp:2.2.0
+#            dockerfile: .
+#        ports:
+#            - "8000:8000"
+#        volumes:
+#            - .:/var/www/html
 
-    elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
-        container_name: elasticsearch
-        environment:
-            - discovery.type=single-node
-            - xpack.security.enabled=false
-            - xpack.security.http.ssl.enabled=false
-        ports:
-            - "9200:9200"
-#        networks:
-#            - elastic
-        volumes:
-            - esdata:/usr/share/elasticsearch/data
+#    elasticsearch:
+#        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+#        container_name: elasticsearch
+#        environment:
+#            - discovery.type=single-node
+#            - xpack.security.enabled=false
+#            - xpack.security.http.ssl.enabled=false
+#        ports:
+#            - "9200:9200"
+#        volumes:
+#            - esdata:/usr/share/elasticsearch/data
 
     mysql:
         image: mysql:latest
@@ -44,19 +44,19 @@ services:
        environment:
            - UPLOAD_LIMIT=1G
            - PMA_ARBITRARY=1
-    kibana:
-        image: docker.elastic.co/kibana/kibana:8.12.0
-        ports:
-            - "5601:5601"
-        depends_on:
-            - elasticsearch
+#    kibana:
+#        image: docker.elastic.co/kibana/kibana:8.12.0
+#        ports:
+#            - "5601:5601"
+#        depends_on:
+#            - elasticsearch
 
-networks:
-    elastic:
-        driver: bridge
+#networks:
+#    elastic:
+#        driver: bridge
 
 volumes:
-    esdata:
-        driver: local
+#    esdata:
+#        driver: local
     mysql-data:
         driver: local
